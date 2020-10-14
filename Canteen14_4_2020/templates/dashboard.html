@@ -1,0 +1,571 @@
+<html>
+
+<head>
+    <title>dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style type="text/css">
+        @import "../static/bootstrap-4.5.0-dist/css/main.css";
+    </style>
+    <script src="../static/bootstrap-4.5.0-dist/js/jquery-3.5.1.min.js"></script>
+</head>
+<style>
+    @import url(https://fonts.googleapis.com/css?family=Roboto:300);
+    .table-bordered {
+        box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+        margin: 0 auto 100px;
+        width: 60%;
+        -webkit-transition: all 0.3 ease;
+        transition: all 0.3 ease;
+    }
+    #btn {
+        font-family: "Roboto", sans-serif;
+        text-transform: uppercase;
+        outline: 0;
+        background: #4CAF50;
+        border: 0;
+        padding: 5px;
+        color: #FFFFFF;
+        font-size: 14px;
+        -webkit-transition: all 0.3 ease;
+        transition: all 0.3 ease;
+        cursor: pointer;
+        border-radius: 5px;
+    }
+    #addform {
+        width: 30%;
+        margin: 0 auto 100px;
+    }
+    #updateform {
+        width: 30%;
+        margin: 0 auto 100px;
+    }
+    #adddiv,#updatediv,#searchdiv {
+        display: none;
+    }
+    #products ,#add ,#update ,#delete ,#logout ,#status ,#verify{
+        width: 50%;
+        padding: 5%;
+        margin-top: 20px;
+    }
+    .form-control{
+        width: 200%;
+    }
+    #acceptbtn , #cancelbtn{
+        padding: 5px;
+    }
+</style>
+<script>
+    function w3_open() {
+        document.getElementById("mySidebar").style.display = "block";
+      }
+      function w3_close() {
+        document.getElementById("mySidebar").style.display = "none";
+      }
+</script>
+<script>
+    var owner = JSON.parse('{{owner|safe}}');
+    var items = JSON.parse('{{items|safe }}');
+    var canteen_id_ = JSON.parse('{{canteen_ids|safe }}');
+    var canteen_ids = []
+    for (var i in canteen_id_){
+        canteen_ids.push(canteen_id_[i][0])
+    }
+    ////////////////////////////////////
+    $(document).ready(function() {
+        $(canteen_ids).each(function(index, item) {
+            var option = $('<option value="' + item + '"></option>');
+            $('#product_idlist').append(option);
+        });
+    });
+    ///////////////////////////////////
+    $(document).ready(function(){
+        $("#itemsearch").on("keypress", function() {
+          var item = $(this).val().toLowerCase();
+          $("#tbod-products tr").filter(function() {
+            $(this).toggle($(this).text().toLowerCase().indexOf(item) > -1)
+          });
+        });
+      });
+    ////////////////////////////////////////////////////
+    $(document).ready(function(){
+        $("a#verify").click(function() {
+        var verify = new EventSource("/verifyorder");
+        verify.onmessage = function(e) {
+        var order = JSON.parse(e.data);
+        delete order["_id"];
+        var tabletd = ""
+        for(var i in order){
+        var info= order[i][0];
+        if (info["payment"] == false){
+        tabletd += '<tr><td>'+info["orderid"]+'</td><td>'+info["total products"]+'</td><td>'+info["otp"]+'</td><td><button type="button" class="badge badge-primary" id='+info["orderid"]+' onclick=verified("'+info["orderid"]+'") >verified</button></td></tr>'
+        }
+        }
+        $("#tbod-otp").html(tabletd);
+        }
+        });
+      });
+          ////////////////////////////////////////////////////
+    $(document).ready(function(){
+        $("a#login").click(function() {
+            
+        });
+      });
+    ///////////////////////////////////
+    $(document).ready(function(){
+        $("#otpsearch").on("keypress", function() {
+          var item = $(this).val().toLowerCase();
+          $("#tbod-otp tr").filter(function() {
+            $(this).toggle($(this).text().toLowerCase().indexOf(item) > -1)
+          });
+        });
+      });
+    ///////////////////////////////////
+      function verified(orderid){
+        $('#'+orderid).toggleClass('badge badge-light');
+        $.getJSON('/', {
+            orderid : orderid,
+          },
+          function(data) {
+            alertify.message('Order accepted...');
+          });
+      }
+    ///////////////////////////////////
+
+    $(document).ready(function() {
+        var tiffen = items["tiffen"];
+        var fastfood = items["fastfood"];
+        var juice = items["juice"];
+        var snacks = items["snacks"];
+        var temp = "";
+        for (var i in tiffen) {
+            var products_tr = "<tr>"
+            for (var j in tiffen[i]) {
+                products_tr += "<td>" + tiffen[i][j] + "</td>";
+            }
+            products_tr += "</tr>"
+            temp += products_tr;
+            $("#tbod-products").append(products_tr);
+        }
+
+        for (var i in fastfood) {
+            var products_tr = "<tr>"
+            for (var j in fastfood[i]) {
+                products_tr += "<td>" + fastfood[i][j] + "</td>";
+            }
+            products_tr += "</tr>"
+            temp += products_tr;
+            $("#tbod-products").append(products_tr);
+        }
+
+        for (var i in juice) {
+            var products_tr = "<tr>"
+            for (var j in juice[i]) {
+                products_tr += "<td>" + juice[i][j] + "</td>";
+            }
+            products_tr += "</tr>"
+            temp += products_tr;
+            $("#tbod-products").append(products_tr);
+        }
+
+        for (var i in snacks) {
+            var products_tr = "<tr>"
+            for (var j in snacks[i]) {
+                products_tr += "<td>" + snacks[i][j] + "</td>";
+            }
+            products_tr += "</tr>"
+            temp += products_tr;
+            $("#tbod-products").append(products_tr);
+        }
+        $("a#products").click(function() {
+            $("#updatediv").css("display", "none");
+            $("#adddiv").css("display", "none");
+            $("#statusdiv").css("display", "none");
+            $('#mySidebar').hide();
+            $("#searchdiv").hide();
+            $("#productsdiv").css("display", "block");
+            $("#tbod-products").append(temp);
+        });
+    });
+    ///////////////////////////////////
+    $(document).ready(function() {
+        $(".add-row").click(function() {
+            var type = $('#type').val();
+            var price = $('#price').val();
+            var item = $('#item').val();
+            var qty = $('#qty').val();
+            if (qty == '' || item == '' || price == '' || type == '') {
+                document.getElementById("addform").style.display = "block";
+            } else {
+                var table_tr = "<tr><td><input type='checkbox' name='record'></td><td class='type'>" + type + "</td><td class='item'>" + item + "</td><td class='price'>" + price + "</td><td class='qty'>" + qty + "</td></tr>";
+                $("#tbod").append(table_tr);
+            }
+        });
+    });
+    ////////////////////////////////////////////////////////////////////////////delete selected
+    $(document).ready(function() {
+        $(".delete-row").click(function() {
+            var answer = window.confirm("Do you want update");
+            if (answer) {
+                $("table tbody").find('input[name="record"]').each(function() {
+                    if ($(this).is(":checked")) {
+                        $(this).parents("tr").remove();
+                    }
+                });
+            }
+        });
+    });
+    ///////////////////////////////////////////////////////////////////////////view add
+    $(document).ready(function() {
+        $("a#add").click(function() {
+            $("#productsdiv").css("display", "none");
+            $("#updatediv").css("display", "none");
+            $("#statusdiv").css("display", "none");
+            $('#mySidebar').hide();
+            $("#searchdiv").hide();
+            $("#adddiv").css("display", "block");
+        });
+    });
+    ///////////////////////////////////////////////////////////////////////////////update items
+    $(document).ready(function() {
+        $("a#update").click(function() {
+            $("#statusdiv").css("display", "none");
+            $("#adddiv").css("display", "none");
+            $("#productsdiv").css("display", "none");
+            $('#mySidebar').hide();
+            $("#searchdiv").hide();
+            $("#updatediv").css("display", "block");
+        });
+    });
+    ////////////////////////////////////////////////////////////////////////////////////update items
+    $(document).ready(function() {
+        $(".updateitems").click(function() {
+            var product_id = $('#product_id').val();
+            var type = $('#updatetype').val();
+            var item = $('#updateitem').val();
+            var price = $('#updateprice').val();
+            var qty = $('#updateqty').val();
+            
+            if (product_id != 0 || type != 0 || item != 0 || phone != 0 || qty != 0) {
+                confirm = 0
+                for (var i in canteen_id_) {
+                    if (canteen_id_[i][0] == product_id) {
+                        if(type != canteen_id_[i][1]){
+                            alertify.message("your product id's type is "+canteen_id_[i][1]+" you can't change category");
+                        }
+                        else{
+                            confirm = 1
+                        }
+                    }
+                }
+                if (confirm == 1) {
+                    $.getJSON('/updateproducts', {
+                            product_id: product_id,
+                            type: type,
+                            item: item,
+                            price: price,
+                            qty: qty,
+                        },
+                        function(data) {
+                      alertify.success('Updated ....');
+                      window.location.replace("http://127.0.0.1:5000/dashboard");
+                    });
+                }
+            }
+        });
+    });
+    ///////////////////////////////////////////////////////////////////////////get table data
+    var products_ = [];
+    $(document).ready(function() {
+        $('.sendproducts').click(function() {
+            var answer = window.confirm("Do you want update");
+            if (answer) {
+                $('.table-bordered tbody>tr').each(function() {
+                    var temp = [];
+                    $('td', this).each(function() {
+                        data_ = $(this).text();
+                        if (data_) {
+                            temp.push(data_);
+                        }
+                    });
+                    temp = {
+                        "id": owner["_id"],
+                        "canteen_id":owner["canteen_id"],
+                        "product_id": owner["canteen_id"] + temp[0],
+                        "type": temp[0],
+                        "item": temp[1],
+                        "quantity": Number(temp[2]),
+                        "price": Number(temp[3]),
+                        "available": Number(temp[2])
+                    }
+                    products_.push(temp);
+                    products = JSON.stringify(products_);
+                });
+                $.getJSON('/addproducts', {
+                        oid: owner["_id"],
+                        items: products,
+                    },
+                    function(data) {
+                        alertify.success('Items added ....');
+                        window.location.reload();
+                    });
+                products_ = [];
+            }
+        });
+    });
+    /////////////////////////////////////////////////////////////////////////////////////
+    $(document).ready(function() {
+    $("a#delete").click(function(){
+        document.getElementById("mySidebar").style.display = "none";
+        var product_id=  window.prompt("enter product id to delete","");
+        for (var i in canteen_id_) {
+            if (canteen_id_[i][0] == product_id) {
+                $.getJSON('/deleteproducts', {
+                    product_id: product_id,
+                    item : canteen_id_[i][1],
+                    },
+                    function(data) {
+                      if (data.json = 0){
+                        window.location.replace("http://127.0.0.1:5000/dashboard");
+                      }
+                });
+            }}
+        });
+    });
+//////////////////////////////////////////////////
+$(document).ready(function() {
+    $("a#verify").click(function(){
+        $('#mySidebar').hide();
+        $("#adddiv").hide();
+        $("#productsdiv").hide();
+        $('#mySidebar').hide();
+        $("#updatediv").hide();
+        $("#searchdiv").show();
+    });
+});
+//////////////////////////////////////////////////
+$(document).ready(function() {
+    $("#status").click(function(){
+        $("#adddiv").hide();
+        $("#productsdiv").hide();
+        $("#searchdiv").hide();
+        $('#mySidebar').hide();
+        $("#updatediv").hide();
+        $("#statusdiv").show();
+
+        document.getElementById("mySidebar").style.display = "none";
+        var vieworder = new EventSource("/ownerorderstatus");
+        vieworder.onmessage = function(e) {
+        var order = JSON.parse(e.data);
+        if (order == null){
+            vieworder.close();
+        }
+        delete order["_id"];
+        console.log(order);
+        var table = "";
+    for (var i in order){
+        var info= order[i][0];
+        if(info["level"] == 0){          
+          table += '<table class="table">';
+          table +='<tr><td>Item</td><td>Quantity</td><td>Price</td></tr>';
+          for (var j in order[i][1]){
+            orderlist = order[i][1][j];
+            table += '<tr><td>'+orderlist["item"]+'</td><td>'+orderlist["qty"]+'</td><td>'+orderlist["total cost"]+'</td></tr>'
+            }
+            table +='</table>'
+            table +='<span class="badge badge-success">Total Cost is '+info["total cost"]+'</span>';
+            table += '<button style="float:right;" id="cancelbtn" class="badge badge-danger" onclick =cancel("'+info["orderid"]+'",'+info["regid"]+') >CANCEL</button>'
+            table += '<button style="float:right" id="acceptbtn"  class="badge badge-primary" onclick =accept("'+info["orderid"]+'",'+info["regid"]+') >ACCEPT</button>'
+        }
+        }
+        $('#statusdiv').html(table);
+        };
+    });
+});
+</script>
+<script>
+    function accept(orderid,regid){
+        alertify.confirm("Are you sure?",
+        function(){
+          alertify.message('Order accepted...');
+        });
+        $.getJSON('/adminaccept', {
+            orderid : orderid,
+            regid : Number(regid)
+          },
+          function(data) {
+          });
+    }
+    function cancel(orderid,regid){
+        alertify.confirm("Are you sure?",
+        function(){
+          alertify.message('Order Cancelled...');
+        });
+        $.getJSON('/admincancel', {
+            orderid : orderid,
+            regid : Number(regid)
+          },
+          function(data) {
+          });
+    }
+    function addfunction() {
+        document.getElementById("addform").style.display = "block";
+    }
+
+    function hide() {
+        document.getElementById("addform").style.display = "none";
+    }
+</script>
+
+<body>
+    <div class="w3-sidebar w3-bar-block w3-card w3-animate-left" style="display:none" id="mySidebar">
+        <button class="w3-bar-item w3-button w3-large" onclick="w3_close()">Close &times;</button>
+        <a href="#" id="products"  class="badge badge-info">Products</a><br>
+        <a href="#" id="add"  class="badge badge-danger">Add</a><br>
+        <a href="#" id="update" class="badge badge-success">Update</a><br>
+        <a href="#" id="delete"  class="badge badge-secondary">Delete</a><br>
+        <a href="#" id="status"  class="badge badge-primary">Status</a><br>
+        <a href="#" id="verify"  class="badge badge-warning">Search</a><br>
+        <a href="#" id="logout"  class="badge badge-light">Logout</a><br>
+    </div>
+    <div id="main">
+        <div class="w3-light">
+            <button id="openNav" class="w3-button w3-blue " title="click here" onclick="w3_open()">&#9776; Canteen</button>
+        </div>
+        <div class="container">
+        <div id="productsdiv">
+            <form style ="float: right;" class="form-inline d-flex justify-content-center md-form form-sm mt-0">
+                <i class="fas fa-search" aria-hidden="true"></i>
+                <input class="form-control form-control-sm ml-3 w-75" type="text" placeholder="Search" id="itemsearch"
+                  aria-label="Search">
+              </form>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>id</th>
+                        <th>canteen id</th>
+                        <th>products id</th>
+                        <th>type</th>
+                        <th>item name</th>
+                        <th>quantity</th>
+                        <th>price</th>
+                        <th>available</th>
+                    </tr>
+                </thead>
+                <tbody id="tbod-products">
+
+                </tbody>
+            </table>
+        </div>
+        </div>
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-2"> </div>
+                <div class="col-sm-6">
+                    <div id="updatediv">
+                        <p class="badge badge-warning"> Update Products</p>
+                        <form id="updateform">
+                            <label for="fname">Product Id:</label>
+                            <input type="text" class="form-control" list="product_idlist" id="product_id" placeholder="Enter product id" name="product_id" required/>
+                            <datalist id="product_idlist">
+                                
+                            </datalist>
+                            <label for="fname">Category:</label><br>
+                            <select id="updatetype" class="form-control" required>
+                            <option value="snacks">Snacks</option>
+                            <option value="juice">Juice</option>
+                            <option value="tiffen">Tiffen</option>
+                            <option value="fastfood">Fastfood</option>
+                            </select>
+                            <label for="fname">Item name:</label>
+                            <input type="text" class="form-control" id="updateitem" placeholder="Enter item name" name="updateitem" required/>
+                            <label for="lname">Price:</label>
+                            <input type="number" class="form-control" id="updateprice" placeholder="Enter price" name="updateprice" required/>
+                            <label for="lname">Quantity:</label><br>
+                            <input type="number" class="form-control" id="updateqty" placeholder="Enter quantity" name="updateqty" required/><br>
+                            <tr>
+                                <td><button type="button" class="updateitems" id="btn">update</button></td>
+                            </tr>
+                        </form>
+                    </div>
+            
+                </div>
+            </div>
+        </div>
+
+        <div id="adddiv">
+            <table class="table-bordered">
+                <thead>
+                    <tr>
+                        <th>Select</th>
+                        <th>type</th>
+                        <th>item name</th>
+                        <th>price</th>
+                        <th>quantity</th>
+                    </tr>
+                </thead>
+                <tbody id="tbod">
+
+                </tbody>
+            </table>
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm-2"></div>
+                    <div class="col-sm-3">
+                        <button type="button" class="delete-row" id="btn">Delete Row</button>
+                        <button onclick="addfunction()" id="btn">Add new</button>
+                        <button type="button" class="sendproducts" id="btn">Send</button>  
+                    </div>
+                    <div class="col-sm-5">
+                        <form id="addform" style="display:none;">
+                            <label for="fname">Category:</label><br>
+                            <select id="type" class="form-control" required>
+                                <option value="snacks">Snacks</option>
+                                <option value="juice">Juice</option>
+                                <option value="tiffen">Tiffen</option>
+                                <option value="fastfood">Fastfood</option>
+                            </select>
+                            <label for="fname">Item name:</label>
+                            <input type="text" class="form-control" id="item" placeholder="Enter item name" name="item" required autocomplete="off"/>
+                            <label for="lname">Price:</label>
+                            <input type="number" class="form-control" id="price" placeholder="Enter price" name="price" required/>
+                            <label for="lname">Quantity:</label><br>
+                            <input type="number" class="form-control" id="qty" placeholder="Enter quantity" name="qty" required/><br>
+                            <tr>
+                                <td><button type="button" class="add-row" id="btn">Add</button></td>
+                            </tr>
+                        </form>
+                    </div>
+                </div>   
+            </div>
+        </div>
+
+        <div id="statusdiv">
+
+        </div>
+
+        <div id="searchdiv">
+            <div class="container">
+                <form style="float:right" class="form-inline mr-auto">
+                    <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search" id="otpsearch" autocomplete="off">
+                  </form>
+                  <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Orders</th>
+                            <th>otp</th>
+                            <th>Check out</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbod-otp">
+    
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+<script src="../static/bootstrap-4.5.0-dist/js/alertify.min.js"></script>
+<script src="../static/bootstrap-4.5.0-dist/js/bootstrap.min.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,713 @@
+<html>
+    <head>
+    <title id="title">Canteen system</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style type="text/css">
+        @import "../static/bootstrap-4.5.0-dist/css/main.css";
+    </style>
+    <script src="../static/bootstrap-4.5.0-dist/js/jquery-3.5.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.4.4/umd/popper.min.js"  ></script>
+    </head>
+<style>
+  .selector-for-some-widget {
+    box-sizing: content-box;
+  }
+.table-bordered {
+    box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+    width: 100%;
+    -webkit-transition: all 0.3 ease;
+    transition: all 0.3 ease;
+    border: none;
+}
+.btn {
+    font-family: "Roboto", sans-serif;
+    text-transform: uppercase;
+    outline: 0;
+    background: #4CAF50;
+    border: 0;
+    padding: 5px;
+    color: #FFFFFF;
+    font-size: 14px;
+    -webkit-transition: all 0.3 ease;
+    transition: all 0.3 ease;
+    cursor: pointer;
+    border-radius: 5px;
+
+}
+#up,#down{
+    cursor: pointer;
+}
+#incdecinput{
+    width: 20%;
+}
+.product-h4{
+    clear: both;
+}
+* {
+  box-sizing: border-box;
+}
+.row{
+  margin: 1px;
+}
+.column {
+  float: left;
+  margin-top: 5px;
+  width: 33.33%;
+  box-shadow: 0 5px 6px -6px black;
+}
+/* Clearfix (clear floats) */
+.row::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+/* Responsive layout - makes the three columns stack on top of each other instead of next to each other */
+@media screen and (max-width: 500px) {
+  .column {
+    width: 50%;
+  }
+}
+.dropdown{
+  float: right;
+  margin-top: 15px;
+}
+.dropdown-menu{
+  margin-right: 10px;
+  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+}
+.cartview{
+  display: none;
+}
+#cartnext{
+  float: right;
+  margin-bottom: 10%;
+  margin-right: 5%;
+  box-shadow: 5px 10px 180px #888888;
+}
+#next{
+  background: #007bff;
+  background: linear-gradient(to right, #0062E6, #33AEFF);
+  float: right;
+  display: none;
+}
+.footer{
+  height:8%;
+  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+}
+.header{
+  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+  padding: 1rem;
+  top:0px;
+  background-color: #efefef;
+}
+.main{
+  height: auto;
+}
+
+#account ,#cartnav ,#itemsnav ,#ordersnav{
+  width: 50%;
+  padding: 5%;
+  margin-top: 20px;
+}
+.accountcls{
+  display: none;
+}
+#product_status{
+  margin-top: 10px;
+}
+#product_status1{
+  margin-top: 15%;
+}
+.card-title{
+  text-transform: uppercase;
+  font-weight: normal;
+  box-shadow: 0 5px 3px -6px black;
+}
+.orderviewtable{
+  margin-top: 3%;
+}
+html,
+body {
+  height: 100%;
+  padding-bottom:60px;
+}
+.footer {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 1rem;
+  background-color: #efefef;
+  text-align: center;
+}
+#mySidebar{
+  background-color: #efefef;
+}
+</style>
+
+<script>
+  function w3_open() {
+    document.getElementById("mySidebar").style.display = "block";
+  }
+  function w3_close() {
+    document.getElementById("mySidebar").style.display = "none";
+  }
+</script>
+<script>
+/////////////////////////////////////////////////////////////////////////////account details
+    var student = JSON.parse('{{ student|safe}}');
+    $("#title").text(student["_id"]);
+    var addtocart = [];
+    var removecart = [];
+    var cond_ = "default";
+    var change = 0;
+    var account_update = 0;
+    $(document).ready(function() {
+      $("a#account").click(function() {
+        cond_ = "account";
+        account_update = 1; 
+        $('.dropdown').css("display","none");
+        $('#productsview').css("display","none");
+        $('.cartview').css("display","none");
+        $("#message").text("Account details");
+        $('.checkoutcls').css("display","none");
+        document.getElementById("mySidebar").style.display = "none";
+        form = '<form action="#"><label>Reg Id:</label><br><input type="text" class="form-control" placeholder='+student["_id"]+' id="regid" name="regid" value='+student["_id"]+' readonly><br><label>Name:</label><br><input type="text" class="form-control" placeholder='+student["name"]+' id="name" name="name" value='+student["name"]+' required ><br><label>Department:</label><br><input type="text" class="form-control" placeholder='+student["dept"]+' id="dept" name="dept" value='+student["dept"]+' readonly><br><label>Year:</label><br><input type="number" class="form-control" placeholder='+student["year"]+' id="year" name="year" value='+student["year"]+' required><br><label>Section:</label><br><input type="text" style="text-transform: uppercase;" class="form-control" placeholder='+student["section"]+' id="section" name="section" value='+student["section"]+' required><br><label>Email:</label><br><input type="email" class="form-control" placeholder='+student["email"]+' id="email" name="email" value='+student["email"]+' required><br>'
+        $('.accountcls').css("display","block");
+        $('.accountcls').html(form);
+        $("#next").html("update");
+      });
+    });
+/////////////////////////////////////////////////////////////////next button click
+$(document).ready(function() {
+      $("#next").click(function() {
+        if(account_update == 1){
+          yeard = [1,2,3,4];
+          depta = ['CSE','CIVIL','EEE','ECE'];
+          dept = $('#dept').val();
+          sectiona = ['C','D'];
+          sectiond = ['A','B','C','D'];
+          name = $('#name').val();
+          year = Number($('#year').val());
+          section = $('#section').val().toUpperCase();
+          email =$('#email').val();
+          if(email == "false"){
+            alertify.set('notifier','position', 'top-center');
+            alertify.error('Invalid email ....');
+            return 0;
+          }
+          if(yeard.includes(year) != true){
+            alertify.error('Invalid year ....');
+            return 0;
+          }
+          if(sectiond.includes(section) != true){
+            alertify.error('Invalid section ....');
+            return 0;
+          }
+          if(sectiond.includes(section) == true){
+            if (dept.includes(dept) == true && sectiona.includes(section) == true){
+              alertify.error('Invalid section ....');
+              return 0;
+            }
+          }
+          $.getJSON('/updatestudent', {
+            year:year,
+            section:section,
+            name:name,
+            email:email
+        },
+        function(data) {
+          alertify.message('Updated....');    
+        });
+        }
+        
+        else if (change == 1){
+          if (addtocart.length < 1){
+            alertify.warning('Oops Nothing selected ....');
+            return 0;
+          }
+          $('.dropdown').css("display","none");
+          $('.accountcls').css("display","none");
+          $("#next").hide();
+          $("#next").html("check out");
+          $('#productsview').css("display","none");
+          $('.cartview').css("display","block");
+          $("#message").text("Loading....");
+          cond_ = "cartnav";
+        document.getElementById("mySidebar").style.display = "none";
+        }
+        else if(change == 2){
+          if (addtocart.length < 1){
+            alertify.warning('Oops Nothing selected ....');
+            window.location.reload();
+            return 0;
+          }
+          cond_ = "checkout";
+          $('.accountcls').css("display","none");
+          $('.cartview').css("display","none");
+          $("#next").hide();
+          $("#next").html("order");
+          $('.checkoutcls').css("display","block");
+          $("#message").text("Loading....");
+        }
+        else if(change == 3){
+          cart = JSON.stringify(addtocart);
+          $.getJSON('/studentorders', {
+            cart:cart
+        },
+        function(data) {
+          alertify.success('Items ordered....');
+          window.location.reload();
+        });
+        }
+      });
+  });
+////////////////////////////////////////////////////////cancelone
+function cancelone(orderid,product_id,canteen_id,price){
+  alertify.confirm("Are you sure?",
+  function(){
+    alertify.message('Order cancelled...');
+    $.getJSON('/canceloneorder', {
+      orderid : orderid,
+      product_id : product_id,
+      canteen_id : canteen_id,
+      price : Number(price)
+    },
+    function(data) {
+    });
+  });
+
+}
+function cancel(orderid,canteen_id){
+  alertify.confirm("Are you sure?",
+  function(){
+    alertify.message('Order cancelled...');
+    $.getJSON('/cancelorder', {
+      orderid : orderid,
+      canteen_id : canteen_id,
+    },
+    function(data) {
+    });
+  });
+}
+///////////////////////////////////////////////orders click
+$(document).ready(function() {
+  $("a#ordersnav").click(function() {
+    $('.checkoutcls').css("display","none");
+    $('.accountcls').css("display","none");
+    $('.dropdown').css("display","none");
+    $('#productsview').hide();
+    $("#next").hide();
+    $('.cartview').css("display","none");
+    $("#message").hide();
+    $("#mySidebar").hide();
+    cond_ = 0;
+    var vieworder = new EventSource("/vieworders");
+    vieworder.onmessage = function(e) {
+    var order = JSON.parse(e.data);
+    delete order["_id"];
+    var table = "";
+    var objectlen = Object.keys(order).length;
+    if(objectlen == 0){
+      vieworder.close();
+      alertify.message('Orders not available...');
+    }
+  for (var i in order){
+      var info= order[i][0];
+    if(info["level"] == -1){
+        table +='<div class="orderviewtable"><table><tr><td><p id="product_status">Status </p></td><td><span class="badge badge-warning">Order cancelled</span></td></tr>';        
+      }
+    else if(info["level"] == 0){
+      table +='<div class="orderviewtable"><table><tr><td><p id="product_status1">Status </p></td><td><span class="badge badge-secondary">No yet did confirm</span></td></tr>';
+    }
+    else if(info["level"] == 1){
+      table +='<div class="orderviewtable"><table><tr><td><p id="product_status">Status </p></td><td><span class="badge badge-primary">Order confirmed</span></td></tr>';
+      table +='<tr><td><p id="product_status">otp</p></td><td><span class="badge badge-success">Mailed...</span></td></tr>';
+    }
+      table +='<tr><td><p id="product_status">Order ID </p></td><td><span class="badge badge-success">'+info["orderid"]+'</span></td></tr>';
+      table +='<tr><td><p id="product_status">Canteen ID </p></td><td><span class="badge badge-success">'+info["canteen_id"]+'</span></td></tr>';
+      table +='<tr><td><p id="product_status">No of Items </p></td><td><span class="badge badge-success">'+info["total products"]+'</span></td></tr>';
+      table +='<tr><td><p id="product_status">Total Cost </p></td><td><span class="badge badge-success">'+info["total cost"]+'</span></td></tr></table>';
+      table += '<table class="table-bordered">';
+    if (info["level"] == -1 || info["level"] == 1){
+      table +='<tr><td>Canteen</td><td>Item</td><td>Quantity</td><td>Price</td></tr>';
+        }
+    else{
+      table +='<tr><td>Canteen</td><td>Item</td><td>Quantity</td><td>Price</td><td>Cancel</td></tr>';
+      }
+    for (var j in order[i][1]){
+        orderlist = order[i][1][j];
+        table += '<tr><td>'+orderlist["canteen_id"]+'</td><td>'+orderlist["item"]+'</td><td>'+orderlist["qty"]+'</td><td>'+orderlist["total cost"]+'</td>'
+        if (info["level"] != 1 && info["level"] != -1){
+        table +='<td><button style="width:100%;" class="badge badge-light" onclick =cancelone("'+info["orderid"]+'","'+orderlist["product_id"]+'","'+info["canteen_id"]+'",'+orderlist["total cost"]+') >&#10060;</button></td></tr>'
+        }
+      }
+    if (info["level"] == 0){
+      table += '</table><button style="float:right" class="badge badge-danger" onclick =cancel("'+info["orderid"]+'","'+info["canteen_id"]+'") >CANCEL</button></div>'
+      }
+    else if(info["level"] == 1){
+        table += '</table><button style="float:right" class="badge badge-success" onclick =payment("'+info["orderid"]+'") >PAYMENT</button></div>'
+      }
+    else{
+      table += '</div>'
+    }
+    }
+    $('.ordercls').html(table);
+    };
+  });
+});
+//////////////////////////////////////////////////////////cart click
+    $(document).ready(function() {
+      $("a#cartnav").click(function() {
+        account_update = 0;
+        change = 2;
+        if (addtocart.length < 1){
+          alertify.warning('Oops Nothing selected...');
+          window.location.reload();
+          return 0;
+        }
+        $('.checkoutcls').css("display","none");
+        $('.accountcls').css("display","none");
+        $('.dropdown').css("display","none");
+        $('#productsview').css("display","none");
+        $("#next").hide();
+        $("#next").html("check out");
+        $('.cartview').css("display","block");
+        $("#message").text("Loading....");
+        cond_ = "cartnav";
+      document.getElementById("mySidebar").style.display = "none";
+      });
+    });
+////////////////////////////////////////////////////////item click
+    $(document).ready(function() {
+      $("a#itemsnav").click(function() {
+        account_update = 0;
+        change = 1;
+        $('.checkoutcls').css("display","none");
+        $('.accountcls').css("display","none");
+        $('.cartview').css("display","none");
+        $("#message").text("Loading...");
+        $("#next").hide();
+        $("#next").html("cart");
+        $('#productsview').css("display","block");
+        cond_ = "default";
+        document.getElementById("mySidebar").style.display = "none";
+        $('.dropdown').css("display","block");
+      });
+    });
+/////////////////////////////////////////////////////////any click
+    $(document).ready(function() {
+      $("a#any").click(function() {
+        $("#message").text("Loading....");
+        cond_ = "default";
+      });
+    });
+////////////////////////////////////////////////////////////////////////////////////////////tiffen click
+    $(document).ready(function() {
+      $("a#tiffen").click(function() {
+        $("#next").hide();
+        $("#productsview").hide();
+        $("#message").text("Loading....");
+        cond_ = "tiffen";
+      });
+    });
+////////////////////////////////////////////////fastfood click
+    $(document).ready(function() {
+      $("a#fastfood").click(function() {
+        $("#next").hide();
+        $("#productsview").hide();
+        cond_ = "fastfood";
+        $("#message").text("Loading....");
+      });
+    });
+///////////////////////////////////////////////////snacks click
+    $(document).ready(function() {
+      $("a#snacks").click(function() {
+        $("#next").hide();
+        $("#productsview").hide();
+        cond_ = "snacks";
+        $("#message").show();
+        $("#message").text("Loading....");
+      });
+    });
+////////////////////////////////////////////////////////////////////////////////////////////juice click
+    $(document).ready(function() {
+      $("a#juice").click(function() {
+        $("#next").hide();
+        $("#productsview").hide();
+        cond_ = "juice";
+        $("#message").text("Loading....");
+      });
+    });
+/////////////////////////////////////////////////sse products get
+    var eventSource = new EventSource("/send-products");
+    eventSource.onmessage = function(e) {
+    var total_cost = 0;
+    var total_items = 0;
+    var cache = [];
+    var ssecart = [];
+    var products_checkout = [];
+    console.log(e.data);
+    var data = JSON.parse(e.data);
+    console.log(data);
+    document.getElementById("productsview").innerHTML = "";
+    var products = '<div class="row">';
+    var checkoutul = ' <ul class="list-group">'
+    for (var i in data){
+/////////////////////////////////////////////sse account
+      $('#checkoutcls').css("display","none");
+      change = 1;
+      if (cond_ == "account"){
+        $('.dropdown').css("display","none");
+        $('#productsview').css("display","none");
+        $('.cartview').css("display","none");
+        $("#message").text("Account details");
+        $('.checkoutcls').css("display","none");
+        break;
+      }
+////////////////////////////////////////////////sse checkout click
+      if(cond_ == "checkout"){
+        $("#next").show();
+        $('#checkoutcls').css("display","block");
+        $("#message").text("Check out");
+        change = 3;
+        var x = data[i]["product_id"];
+        for (var j in addtocart){
+            var y = addtocart[j]["product_id"];
+            if(x == y){
+              cache.push(j);
+              total_cost += addtocart[j]["total cost"];
+              total_items +=1;
+              checkoutul += '<li class="list-group-item">'+addtocart[j]["item"]+'<span class="badge badge-secondary">Quantity '+addtocart[j]["qty"]+'</span><span class="badge badge-primary">Price '+addtocart[j]["total cost"]+'</span></li>';
+              break;
+          }
+        }
+      }
+////////////////////////////////////////////sse cart click
+      else if(cond_ == "cartnav"){
+        change = 2;
+      $("#next").show();
+        $("#message").text("Cart");
+        var x = data[i]["product_id"];
+        for (var j in addtocart){
+            var y = addtocart[j]["product_id"];
+            if(x == y){
+              var tr = "tr"+addtocart[j]["product_id"];
+              var qty = "qty"+addtocart[j]["product_id"];
+              var available = "available"+addtocart[j]["product_id"];
+              products += '<div class="column" ><div class="card" id='+tr+'><div class="card-body" id='+tr+'><h5 class="card-title">'+addtocart[j]["item"]+'</h5><h6 class="card-subtitle mb-2 text-muted">'+addtocart[j]["product_id"]+'</h6><h6 class="card-subtitle mb-2 text-muted">price '+addtocart[j]["price"]+'</h6><h6 class="card-subtitle mb-2 text-muted">Quantity '+data[i]["available"]+'</h6><h6 class="card-subtitle mb-2 text-muted">Quantity '+addtocart[j]["qty"]+'</h6><button class="btn" id=btnRemove1'+addtocart[j]["product_id"]+' onclick=removecarts1("'+addtocart[j]["product_id"]+'",'+addtocart[j]["_id"]+')>Cancel</button></div></div></div>'
+              //cache.push(j);
+              break;
+          }
+        }
+      }
+////////////////////////////////////////////////////sse tiffen click
+    else if (cond_ == "tiffen" && data[i]["type"] == "tiffen"){
+      $("#productsview").show();
+      $("#next").show();
+      $("#message").text(cond_);
+         var tr = "tr"+data[i]["product_id"];
+         var qty = "qty"+data[i]["product_id"];
+         var available = "available"+data[i]["product_id"];
+        products += '<div class="column" ><div class="card" id='+tr+'><div class="card-body" id='+tr+'><h5 class="card-title">'+data[i]["item"]+'</h5><h6 class="card-subtitle mb-2 text-muted">'+data[i]["product_id"]+'</h6><h6 class="card-subtitle mb-2 text-muted">price '+data[i]["price"]+'</h6><h6 class="card-subtitle mb-2 text-muted">available '+data[i]["available"]+'</h6><h6 id='+available+' style="display:none">'+data[i]["available"]+'</h6><input class="form-control" style="width:50%;float:left;" id="number" type="text" value="0" /><input onclick=incrementValue("'+qty+'",'+data[i]["available"]+') type="button" value="↑" /><input onclick=decrementValue("'+qty+'")  type="button" value="↓" /><br><br><button class="btn" id=btnAdd'+data[i]["product_id"]+' onclick=cart("'+data[i]["product_id"]+'","'+data[i]["item"]+'",'+data[i]["id"]+',"'+data[i]["canteen_id"]+'")>Add to cart</button><button style="display:none;" class="btn" id=btnRemove'+data[i]["product_id"]+' onclick=removecarts("'+data[i]["product_id"]+'",'+data[i]["id"]+')>Cancel</button></div></div></div>'
+        
+    }
+////////////////////////////////////////////////////////////////////////////////////////////sse fastfood click
+    else if (cond_ == "fastfood" && data[i]["type"] == "fastfood"){
+      $("#productsview").show();
+      $("#next").show();
+      $("#message").text(cond_);
+      var tr = "tr"+data[i]["product_id"];
+      var qty = "qty"+data[i]["product_id"];
+      var available = "available"+data[i]["product_id"];
+     products += '<div class="column" ><div class="card" id='+tr+'><div class="card-body" id='+tr+'><h5 class="card-title">'+data[i]["item"]+'</h5><h6 class="card-subtitle mb-2 text-muted">'+data[i]["product_id"]+'</h6><h6 class="card-subtitle mb-2 text-muted">price '+data[i]["price"]+'</h6><h6 class="card-subtitle mb-2 text-muted">available '+data[i]["available"]+'</h6><h6 id='+available+' style="display:none">'+data[i]["available"]+'</h6><input class="form-control" style="width:50%;float:left;" id="number" type="text" value="0" /><input onclick=incrementValue("'+qty+'",'+data[i]["available"]+') type="button" value="↑" /><input onclick=decrementValue("'+qty+'") type="button" value="↓" /><br><br><button class="btn" id=btnAdd'+data[i]["product_id"]+' onclick=cart("'+data[i]["product_id"]+'","'+data[i]["item"]+'",'+data[i]["id"]+','+data[i]["price"]+',"'+data[i]["canteen_id"]+'")>Add to cart</button><button style="display:none;" class="btn" id=btnRemove'+data[i]["product_id"]+' onclick=removecarts("'+data[i]["product_id"]+'",'+data[i]["id"]+')>Cancel</button></div></div></div>'
+    }
+////////////////////////////////////////////////////////////////////////////////////////////sse juice click
+    else if (cond_ == "juice" && data[i]["type"] == "juice"){
+      $("#productsview").show();
+      $("#next").show();
+      $("#message").text(cond_);
+      var tr = "tr"+data[i]["product_id"];
+      var qty = "qty"+data[i]["product_id"];
+      var available = "available"+data[i]["product_id"];
+     products += '<div class="column" ><div class="card" id='+tr+'><div class="card-body" id='+tr+'><h5 class="card-title">'+data[i]["item"]+'</h5><h6 class="card-subtitle mb-2 text-muted">'+data[i]["product_id"]+'</h6><h6 class="card-subtitle mb-2 text-muted">price '+data[i]["price"]+'</h6><h6 class="card-subtitle mb-2 text-muted">available '+data[i]["available"]+'</h6><h6 id='+available+' style="display:none">'+data[i]["available"]+'</h6><input class="form-control" style="width:50%;float:left;" id="number" type="text" value="0" /><input onclick=incrementValue("'+qty+'",'+data[i]["available"]+') type="button" value="↑" /><input onclick=decrementValue("'+qty+'")  type="button" value="↓" /><br><br><button class="btn" id=btnAdd'+data[i]["product_id"]+' onclick=cart("'+data[i]["product_id"]+'","'+data[i]["item"]+'",'+data[i]["id"]+','+data[i]["price"]+',"'+data[i]["canteen_id"]+'")>Add to cart</button><button style="display:none;" class="btn" id=btnRemove'+data[i]["product_id"]+' onclick=removecarts("'+data[i]["product_id"]+'",'+data[i]["id"]+')>Cancel</button></div></div></div>'
+    }
+////////////////////////////////////////////////////////////////////////////////////////////sse snacks click
+    else if (cond_ == "snacks" && data[i]["type"] == "snacks"){
+      $("#productsview").show();
+      $("#next").show();
+      $("#message").text(cond_);
+      var tr = "tr"+data[i]["product_id"];
+      var qty = "qty"+data[i]["product_id"];
+      var available = "available"+data[i]["product_id"];
+      products += '<div class="column" ><div class="card" id='+tr+'><div class="card-body" id='+tr+'><h5 class="card-title">'+data[i]["item"]+'</h5><h6 class="card-subtitle mb-2 text-muted">'+data[i]["product_id"]+'</h6><h6 class="card-subtitle mb-2 text-muted">price '+data[i]["price"]+'</h6><h6 class="card-subtitle mb-2 text-muted">available '+data[i]["available"]+'</h6><h6 id='+available+' style="display:none">'+data[i]["available"]+'</h6><input class="form-control" style="width:50%;float:left;" id="number" type="text" value="0" /><input onclick=incrementValue("'+qty+'",'+data[i]["available"]+') type="button" value="↑" /><input onclick=decrementValue("'+qty+'")  type="button" value="↓" /><br><br><button class="btn" id=btnAdd'+data[i]["product_id"]+' onclick=cart("'+data[i]["product_id"]+'","'+data[i]["item"]+'",'+data[i]["id"]+','+data[i]["price"]+',"'+data[i]["canteen_id"]+'")>Add to cart</button><button style="display:none;" class="btn" id=btnRemove'+data[i]["product_id"]+' onclick=removecarts("'+data[i]["product_id"]+'",'+data[i]["id"]+')>Cancel</button></div></div></div>'
+    }
+////////////////////////////////////////////////////////////////////////////////////////////sse default click
+    else if (cond_ == "default"){
+      var item_name = data[i]["item"].split(" ").join("_");
+      $("#message").text("Items");
+      $("#productsview").show();
+      $("#next").show();
+    var tr = "tr"+data[i]["product_id"];
+    var qty = "qty"+data[i]["product_id"];
+    var available = "available"+data[i]["product_id"];
+    products += '<div class="column" ><div class="card border-light mb-3" id='+tr+'><div class="card-body" id='+tr+'><h5 class="card-title">'+data[i]["item"]+'</h5><h6 class="card-subtitle mb-2 text-muted">'+data[i]["product_id"]+'</h6><h6 class="card-subtitle mb-2 text-muted">price '+data[i]["price"]+'</h6><h6 class="card-subtitle mb-2 text-muted">available '+data[i]["available"]+'</h6><h6 id='+available+' style="display:none">'+data[i]["available"]+'</h6><input class="form-control" style="width:50%;float:left;" id='+qty+' placeholder="Quantity" type="number" /><input  onclick=incrementValue("'+qty+'",'+data[i]["available"]+') type="button" value="↑" /><input onclick=decrementValue("'+qty+'") type="button" value="↓" /><br><br><button class="btn" id=btnAdd'+data[i]["product_id"]+' onclick=cart("'+data[i]["product_id"]+'","'+item_name+'",'+data[i]["id"]+','+data[i]["price"]+',"'+data[i]["canteen_id"]+'")>Add to cart</button><button style="display:none;" class="btn" id=btnRemove'+data[i]["product_id"]+' onclick=removecarts("'+data[i]["product_id"]+'",'+data[i]["id"]+')>Cancel</button></div></div></div>'
+    }
+
+    for(var j in data){
+      var qty = "qty"+data[j]["product_id"];
+      $("#"+qty).val(Number($("#"+qty).val()));
+    }
+
+    //<input  min=1 max='+data[i]["available"]+' type="number"   style="width:50%"  />
+      }
+////////////////////////////////////////////////////////////////////////////////////////////sse checkout condition
+      if (cond_ == "checkout"){
+        checkoutul += '<li class="list-group-item" style="color:red">Total<span class="badge badge-secondary">Total Items '+total_items+'</span><span class="badge badge-success">Total Cost'+total_cost+'</span>';
+        checkoutul += '</ul>';
+        $('.checkoutcls').html(checkoutul);
+      }
+////////////////////////////////////////////////////////////////////////////////////////////sse cart condition
+      if(cond_ == "cartnav"){
+        products +='</div>'
+        $('#cartviewid').html(products);
+      }
+      products +='</div>'
+      document.getElementById("productsview").innerHTML = products;
+
+    for(var i in removecart){
+    $("#tr"+removecart[i]["product_id"]).css("color","black");
+    $("#btnRemove1"+removecart[i]["product_id"]).css("display","none");
+    }
+
+    for (var i in addtocart){
+      $("#btnAdd"+addtocart[i]["product_id"]).css("display","none");
+      $("#tr"+addtocart[i]["product_id"]).css("color","green");
+      $("#btnRemove"+addtocart[i]["product_id"]).css("display","block");
+      $("#btnRemove"+addtocart[i]["product_id"]).css("background-color","red");
+      $("#qty"+addtocart[i]["product_id"]).val(addtocart[i]["qty"]);
+      $("#qty"+addtocart[i]["product_id"]).attr("readonly",true);
+
+    }
+};
+////////////////////////////////////////////////////////////////////////////////////addcart
+function incrementValue(qty,available){
+  if (Number(available) >= Number($('#'+qty).val())+1){
+  $('#'+qty).val(Number($('#'+qty).val())+1);
+  }
+}
+function decrementValue(qty){
+  if (Number($('#'+qty).val())-1 != -1 && Number($('#'+qty).val())-1 != 0  ){
+  $('#'+qty).val(Number($('#'+qty).val())-1);
+  }
+}
+////////////////////////////////////////////////////////////////////////////////////////
+
+function cart(product_id,item,_id,price,canteen_id)
+{
+  qty = Number(document.getElementById("qty"+product_id).value);
+  available = Number(document.getElementById("available"+product_id).innerText);
+
+  if (qty <= available && qty > 0){
+    json_ = {
+      "_id":_id,
+      "canteen_id":canteen_id,
+      "product_id":product_id,
+      "item":item,
+      "qty":qty,
+      "price":price,
+      "total cost":qty*price
+    }
+   addtocart.push(json_);
+   $("#btnAdd"+json_["product_id"]).css("display","none");
+   $("#tr"+json_["product_id"]).css("color","green");
+   $("#btnRemove"+json_["product_id"]).css("display","block");
+   $("#btnRemove"+json_["product_id"]).css("background-color","red");
+   $("#qty"+json_["product_id"]).val(json_["qty"]);
+  }
+  else{
+    alert("Sorry you can't order "+item+" more than "+available);
+  }
+}
+////////////////////////////////////////////////////////////////////////////////////removecart
+function removecarts(product_id,id)
+{
+  for(var i=0; i<addtocart.length; i++){
+    if (addtocart[i]["product_id"]==product_id){
+      addtocart.splice(i,1);
+    }
+  }
+removecart.push(product_id);
+$("#btnAdd"+product_id).css("display","block");
+$("#btnRemove"+product_id).css("display","none");
+}
+////////////////////////////////////////////////////////////////////////////////////removecart1 
+function removecarts1(product_id,id)
+{
+  $("#message").text("Cancelling....");
+  for(var i=0; i<addtocart.length; i++){
+  if (addtocart[i]["product_id"]==product_id){
+    addtocart.splice(i,1);
+  }
+  }
+removecart.push(product_id);
+$("#btnAdd"+product_id).css("display","block");
+$("#btnRemove"+product_id).css("display","none");
+$("#btnRemove1"+product_id).css("display","none");
+}
+
+///////////////////////////////////////////////////////////////////////
+</script>
+<body>
+<div class="w3-sidebar w3-bar-block" style="display:none" id="mySidebar">
+<button onclick="w3_close()" class="w3-bar-item w3-button w3-large">Close &times;</button>
+<a href="#" id="account"  class="badge badge-info">Account</a><br>
+<a href="#" id="itemsnav"  class="badge badge-danger">Items</a><br>
+<a href="#" id="cartnav" class="badge badge-success">Cart</a><br>
+<a href="#" id="ordersnav"  class="badge badge-primary">Orders</a><br>
+</div>
+
+<div class="header"> 
+  <div class="dropdown">
+    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Items
+    </button>
+    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+      <a href="#" id="any" class="w3-bar-item w3-button" >Any</a><br>
+      <a href="#" id="tiffen" class="w3-bar-item w3-button" >Tiffen</a>
+      <a href="#" id="fastfood" class="w3-bar-item w3-button" >Fastfood</a>
+      <a href="#" id="juice" class="w3-bar-item w3-button" >Juice</a>
+      <a href="#" id="snacks" class="w3-bar-item w3-button" >Snacks</a>
+    </div>
+  </div>
+  <div class="w3">
+  <button id="openNav" class="w3-button w3-xlarge" onclick="w3_open()">&#9776;Canteen</button>
+  <h5 id="message" class="badge badge-info"></h5>
+  </div>
+</div>
+
+<div style="overflow-y: scroll;margin-bottom:100px;">
+<div id="productsview">
+
+</div>
+<div class="cartview" id="cartviewid">
+
+</div>
+<div class="checkoutcls">
+
+</div>
+<div class="accountcls">
+
+</div>
+<div class="ordercls">
+
+</div>
+</div>
+<div class="footer">
+  <button type="button" id="next" class="btn btn-secondary dropdown-toggle" aria-haspopup="true" aria-expanded="false">cart</button>
+</div>
+<script src="../static/bootstrap-4.5.0-dist/js/alertify.min.js"></script>
+<script src="../static/bootstrap-4.5.0-dist/js/bootstrap.min.js"></script>
+</body>
+</html>
